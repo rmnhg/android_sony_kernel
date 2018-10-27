@@ -1,0 +1,150 @@
+/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+
+/dts-v1/;
+
+#include "msm8226-v2.dtsi"
+#include "msm8226-memory.dtsi"
+#include "msm8226-qseecom.dtsi"
+#include "msm8226-sharedmem.dtsi"
+#include "msm8226-yukon_seagull-720p-mtp.dtsi"
+/* #include "msm8226-yukon_seagull-camera-sensor.dtsi" */
+
+
+/ {
+	model = "Qualcomm MSM 8226v2 MTP";
+	compatible = "qcom,msm8226-mtp", "qcom,msm8226", "qcom,mtp", "somc,seagull";
+	qcom,board-id = <8 0>;
+
+	memory {
+		alt_peripheral_mem: peripheral_region@8000000 {
+			linux,reserve-contiguous-region;
+			linux,reserve-region;
+			linux,remove-completely;
+			reg = <0x08000000 0x5c00000>;
+			label = "peripheral_mem";
+		};
+	};
+};
+
+&modem_mem {
+	status = "disabled";
+};
+
+&peripheral_mem {
+	status = "disabled";
+};
+
+&qsecom_mem {
+	linux,memory-limit = <0x0>;
+};
+
+&soc {
+	qcom,mss@fc880000 {
+		reg = <0xfc880000 0x100>,
+		      <0xfd485000 0x400>,
+		      <0xfc820000 0x20>,
+		      <0xfc401680 0x4>;
+		reg-names = "qdsp6_base", "halt_base", "rmb_base",
+			    "restart_reg";
+		vdd_mss-supply = <&pm8226_s5>;
+	};
+
+	qcom,msm-thermal {
+		qcom,cpu-sensors = "tsens_tz_sensor5", "tsens_tz_sensor5",
+				"tsens_tz_sensor1", "tsens_tz_sensor1";
+	};
+
+	qcom,mpm@fc4281d0 {
+		qcom,gpio-map = <3  1>,
+			<4  4 >,
+			<5  5 >,
+			<6  9 >,
+			<7  13>,
+			<8  17>,
+			<9  21>,
+			<10  27>,
+			<11  29>,
+			<12  31>,
+			<13  33>,
+			<14  35>,
+			<15  37>,
+			<16  38>,
+			<17  39>,
+			<18  41>,
+			<19  46>,
+			<20  48>,
+			<21  49>,
+			<22  50>,
+			<23  51>,
+			<24  52>,
+			<25  54>,
+			<26  62>,
+			<27  63>,
+			<28  64>,
+			<29  65>,
+			<30  66>,
+			<31  67>,
+			<32  68>,
+			<33  69>,
+			<34  71>,
+			<35  72>,
+			<36  106>,
+			<37  107>,
+			<38  108>,
+			<39  109>,
+			<40  110>,
+			<41  119>,
+			<54  111>,
+			<55  113>;
+	};
+
+	qcom,lpass@fe200000 {
+		linux,contiguous-region = <&adsp_venus_mem>;
+	};
+
+	qcom,mss@fc880000 {
+		linux,contiguous-region = <&modem_mem>;
+	};
+
+	qcom,venus@fdce0000 {
+		linux,contiguous-region = <&adsp_venus_mem>;
+	};
+
+	qcom,pronto@fb21b000 {
+		linux,contiguous-region = <&alt_peripheral_mem>;
+	};
+};
+
+&tlmm_pinmux {
+	gp: gp {
+		qcom,num-pins = <120>;
+	};
+};
+
+&msmgpio {
+	ngpio = <121>;
+};
+
+&hsic_host {
+	interrupt-map = <0 &intc 0 136 0
+		1 &intc 0 148 0
+		2 &msmgpio 119 0x8>;
+	hsic,strobe-gpio = <&msmgpio 119 0x00>;
+	hsic,data-gpio = <&msmgpio 120 0x00>;
+};
+
+&usb_otg {
+	/delete-property/ qcom,hsusb-otg-disable-reset;
+	qcom,ahb-async-bridge-bypass;
+};
